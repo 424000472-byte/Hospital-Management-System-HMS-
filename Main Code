@@ -1,0 +1,325 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+// Define the maximum number of patients, doctors, and appointments
+#define MAX_PATIENTS 100
+#define MAX_DOCTORS 50
+#define MAX_APPOINTMENTS 200
+// Patient structure
+typedef struct {
+int id;
+char name[100];
+int age;
+char gender[10];
+char diagnosis[200];
+} Patient;
+// Doctor structure
+typedef struct {
+int id;
+char name[100];
+char specialization[100];
+} Doctor;
+// Appointment structure
+typedef struct {
+int id;
+int patient_id;
+int doctor_id;
+char date[20]; // Format: YYYY-MM-DD
+char time[10]; // Format: HH:MM
+char status[20]; // e.g., Scheduled, Completed, Cancelled
+} Appointment;
+// Global arrays to store patients, doctors, and appointments
+Patient patients[MAX_PATIENTS];
+Doctor doctors[MAX_DOCTORS];
+16
+Appointment appointments[MAX_APPOINTMENTS];
+// Counters to keep track of the number of patients, doctors, and appointments
+int patient_count = 0;
+int doctor_count = 0;
+int appointment_count = 0;
+// Function prototypes
+void show_menu();
+void add_patient();
+void display_patients();
+void search_patient();
+void schedule_appointment();
+void assign_doctor();
+void update_appointment_status();
+void add_doctor();
+void display_appointments();
+int validate_patient_id(int id);
+int validate_doctor_id(int id);
+int validate_date(const char* date);
+int validate_time(const char* time);
+int main() {
+int choice;
+while (1) {
+show_menu();
+scanf("%d", &choice);
+switch (choice) {
+case 1:
+add_patient();
+break;
+case 2:
+add_doctor();
+break;
+case 3:
+display_patients();
+break;
+case 4:
+17
+search_patient();
+break;
+case 5:
+schedule_appointment();
+break;
+case 6:
+assign_doctor();
+break;
+case 7:
+update_appointment_status();
+break;
+case 8:
+display_appointments();
+break;
+case 9:
+printf("Exiting...\n");
+exit(0);
+default:
+printf("Invalid choice! Please try again.\n"); }}
+return 0; }
+void show_menu(){
+printf("\nHospital Management System\n");
+printf("1. Add New Patient\n");
+printf("2. Add New Doctor\n");
+printf("3. Display Patient Details\n");
+printf("4. Search for Patient\n");
+printf("5. Schedule Appointment\n");
+printf("6. Assign Doctor to Patient\n");
+printf("7. Update Appointment Status\n");
+printf("8.View All Appointments\n");
+printf("9. Exit\n");
+printf("Enter your choice: ");
+}
+void add_patient(){
+18
+if (patient_count >= MAX_PATIENTS) {
+printf("Patient limit reached. Cannot add more patients.\n");
+return;
+}
+Patient p;
+p.id = patient_count + 1;
+printf("Enter patient name: ");
+scanf(" %[^\n]", p.name);
+printf("Enter patient age: ");
+scanf("%d", &p.age);
+printf("Enter patient gender: ");
+scanf(" %[^\n]", p.gender);
+printf("Enter patient diagnosis: ");
+scanf(" %[^\n]", p.diagnosis);
+patients[patient_count++] = p;
+printf("Patient added successfully with ID %d.\n", p.id);
+}
+void add_doctor() {
+if (doctor_count >= MAX_DOCTORS) {
+printf("Doctor limit reached. Cannot add more doctors.\n");
+return;
+}
+Doctor d;
+d.id = doctor_count + 1;
+printf("Enter doctor name: ");
+scanf(" %[^\n]", d.name);
+printf("Enter doctor specialization: ");
+scanf(" %[^\n]", d.specialization);
+doctors[doctor_count++] = d;
+printf("Doctor added successfully with ID %d.\n", d.id);
+}
+void display_patients() {
+19
+if (patient_count == 0) {
+printf("No patients available.\n");
+return;
+}
+for (int i = 0; i < patient_count; i++) {
+printf("\nPatient ID: %d\n", patients[i].id);
+printf("Name: %s\n", patients[i].name);
+printf("Age: %d\n", patients[i].age);
+printf("Gender: %s\n", patients[i].gender);
+printf("Diagnosis: %s\n", patients[i].diagnosis);
+}
+}
+void search_patient() {
+int choice;
+printf("Search by: 1. ID 2. Name\n");
+scanf("%d", &choice);
+if (choice == 1) {
+int id;
+printf("Enter patient ID: ");
+scanf("%d", &id);
+for (int i = 0; i < patient_count; i++) {
+if (patients[i].id == id) {
+printf("\nPatient ID: %d\n", patients[i].id);
+printf("Name: %s\n", patients[i].name);
+printf("Age: %d\n", patients[i].age);
+printf("Gender: %s\n", patients[i].gender);
+printf("Diagnosis: %s\n", patients[i].diagnosis);
+return;
+}
+}
+printf("Patient with ID %d not found.\n", id);
+} else if (choice == 2) {
+char name[100];
+printf("Enter patient name: ");
+scanf(" %[^\n]", name);
+20
+for (int i = 0; i < patient_count; i++) {
+if (strcmp(patients[i].name, name) == 0) {
+printf("\nPatient ID: %d\n", patients[i].id);
+printf("Name: %s\n", patients[i].name);
+printf("Age: %d\n", patients[i].age);
+printf("Gender: %s\n", patients[i].gender);
+printf("Diagnosis: %s\n", patients[i].diagnosis);
+return;
+}
+}
+printf("Patient with name %s not found.\n", name);
+} else {
+printf("Invalid choice.\n");
+}
+}
+void schedule_appointment() {
+if (appointment_count >= MAX_APPOINTMENTS) {
+printf("Appointment limit reached. Cannot schedule more appointments.\n");
+return;
+}
+Appointment a;
+a.id = appointment_count + 1;
+printf("Enter patient ID: ");
+scanf("%d", &a.patient_id);
+if (!validate_patient_id(a.patient_id)) {
+printf("Invalid patient ID.\n");
+return;
+}
+printf("Enter doctor ID: ");
+scanf("%d", &a.doctor_id);
+if (!validate_doctor_id(a.doctor_id)) {
+printf("Invalid doctor ID.\n");
+return;
+}
+21
+printf("Enter appointment date (YYYY-MM-DD): ");
+scanf(" %[^\n]", a.date);
+if (!validate_date(a.date)) {
+printf("Invalid date format.\n");
+return;
+}
+printf("Enter appointment time (HH:MM): ");
+scanf(" %[^\n]", a.time);
+if (!validate_time(a.time)) {
+printf("Invalid time format.\n");
+return;
+}
+strcpy(a.status, "Scheduled");
+appointments[appointment_count++] = a;
+printf("Appointment scheduled successfully with ID %d.\n", a.id);
+}
+void assign_doctor() {
+int patient_id, doctor_id;
+printf("Enter patient ID: ");
+scanf("%d", &patient_id);
+printf("Enter doctor ID: ");
+scanf("%d", &doctor_id);
+// Check if patient and doctor IDs are valid
+int patient_found = 0, doctor_found = 0;
+for (int i = 0; i < patient_count; i++) {
+if (patients[i].id == patient_id) {
+patient_found = 1;
+break;
+}
+}
+for (int i = 0; i < doctor_count; i++) {
+if (doctors[i].id == doctor_id) {
+doctor_found = 1;
+break;
+22
+}
+}
+if (patient_found && doctor_found) {
+printf("Doctor with ID %d assigned to patient with ID %d.\n", doctor_id, patient_id); }
+else {
+if (!patient_found) {
+printf("Patient with ID %d not found.\n", patient_id);
+}
+if (!doctor_found) {
+printf("Doctor with ID %d not found.\n", doctor_id);
+}
+}
+}
+void update_appointment_status() {
+int appointment_id;
+char new_status[20];
+printf("Enter appointment ID: ");
+scanf("%d", &appointment_id);
+printf("Enter new status (Scheduled, Completed, Cancelled): ");
+scanf(" %[^\n]", new_status);
+for (int i = 0; i < appointment_count; i++) {
+if (appointments[i].id == appointment_id) {
+strcpy(appointments[i].status, new_status);
+printf("Appointment ID %d status updated to %s.\n", appointment_id, new_status);
+return;
+}
+}
+printf("Appointment with ID %d not found.\n", appointment_id);
+}
+void display_appointments() {
+if (appointment_count == 0) {
+printf("No appointments available.\n");
+return;
+}
+23
+for (int i = 0; i < appointment_count; i++) {
+printf("\nAppointment ID: %d\n", appointments[i].id);
+printf("Patient ID: %d\n", appointments[i].patient_id);
+printf("Doctor ID: %d\n", appointments[i].doctor_id);
+printf("Date: %s\n", appointments[i].date);
+printf("Time: %s\n", appointments[i].time);
+printf("Status: %s\n", appointments[i].status);
+}
+}
+int validate_patient_id(int id) {
+for (int i = 0; i < patient_count; i++) {
+if (patients[i].id == id) {
+return 1; // Valid patient ID
+}
+}
+return 0; // Invalid patient ID
+}
+int validate_doctor_id(int id) {
+for (int i = 0; i < doctor_count; i++) {
+if (doctors[i].id == id) {
+return 1; // Valid doctor ID
+}}
+return 0; // Invalid doctor ID }
+int validate_date(const char* date)
+{
+// Basic date validation (YYYY-MM-DD)
+if (strlen(date) != 10)
+{
+return 0; }
+if (date[4] != '-' || date[7] != '-')
+{
+return 0; }
+// Additional checks can be added here
+return 1; }
+24
+int validate_time(const char* time)
+{
+// Basic time validation (HH:MM)
+if (strlen(time) != 5)
+{
+return 0; }
+if (time[2] != ':')
+{
+return 0; }
+// Additional checks can be added here
+return 1; }
